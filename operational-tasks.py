@@ -10,11 +10,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""
-Connect to an OpenStack cloud.
-For a full guide see TODO(etoews):link to docs on developer.openstack.org
-"""
-
 import argparse
 import os
 import time
