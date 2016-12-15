@@ -11,9 +11,10 @@
 # under the License.
 
 import argparse
+import datetime
+import json
 import os
 import time
-import json
 
 import os_client_config
 
@@ -65,10 +66,10 @@ def create_server(conn):
 
     results['task_name'] = 'create server'
     results['time'] = taskTime
+    results['date'] = datetime.datetime.now()
     file = open('/var/www/html/stats/server-creation', 'w')
     file.write(json.dumps(results))
     delete_server(conn, server)
-
 
 def delete_server(conn, server):
     print("Delete Server:")
