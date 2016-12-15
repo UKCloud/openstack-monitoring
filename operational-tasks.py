@@ -65,7 +65,8 @@ def create_server(conn):
 
     results['task_name'] = 'create server'
     results['time'] = taskTime
-    print(json.dumps(results))
+    file = open('/var/www/html/server-creation', 'w')
+    file.write(json.dumps(results))
     delete_server(conn, server)
 
 
