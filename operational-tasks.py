@@ -1,16 +1,3 @@
-# On branch master
-# Changes not staged for commit:
-#   (use "git add <file>..." to update what will be committed)
-#   (use "git checkout -- <file>..." to discard changes in working directory)
-#
-#    modified:   operational-tasks.py
-#
-# Untracked files:
-#   (use "git add <file>..." to include in what will be committed)
-#
-#    test.py
-no changes added to commit (use "git add" and/or "git commit -a")
-[centos@monautomation openstack-monitoring]$ cat operational-tasks.py
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -68,29 +55,18 @@ def create_server(conn):
     flavor = conn.compute.find_flavor(FLAVOR_NAME)
     network = conn.network.find_network(NETWORK_NAME)
     results = {}
-    status = 'SUCCESS'
-    reasonForFailure = None
 
     start_time = time.time()
-    try:
-      server = conn.compute.create_server(
-          name=SERVER_NAME, image_id=image.id, flavor_id=flavor.id,
-          networks=[{"uuid": network.id}])
-    except Exception as e:
-      status = 'FAILED'
-      reasonForFailure = str(e)
-    if status != 'FAILED':
-      server = conn.compute.wait_for_server(server)
+    server = conn.compute.create_server(
+        name=SERVER_NAME, image_id=image.id, flavor_id=flavor.id,
+        networks=[{"uuid": network.id}])
+    server = conn.compute.wait_for_server(server)
 
     taskTime = time.time() - start_time
 
     results['task_name'] = 'create server'
     results['time'] = taskTime
-    results['date'] = str(datetime.datetime.now())
-    results['task'] = 'create_server'
-    results['status'] = status
-    results['reason_for_failure'] = reasonForFailure
-    print(results)
+    results['date'] = datetime.datetime.now()
     file = open('/var/www/html/stats/server-creation', 'w')
     file.write(json.dumps(results))
     delete_server(conn, server)
