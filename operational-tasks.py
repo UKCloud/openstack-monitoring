@@ -15,7 +15,7 @@ import datetime
 import json
 import os
 import time
-
+import httplib, urllib, time, random
 import os_client_config
 
 from openstack import connection
@@ -55,21 +55,46 @@ def create_server(conn):
     flavor = conn.compute.find_flavor(FLAVOR_NAME)
     network = conn.network.find_network(NETWORK_NAME)
     results = {}
+    status = 'SUCCESS'
+    reasonForFailure = None
 
     start_time = time.time()
-    server = conn.compute.create_server(
-        name=SERVER_NAME, image_id=image.id, flavor_id=flavor.id,
-        networks=[{"uuid": network.id}])
-    server = conn.compute.wait_for_server(server)
+    try:
+      server = conn.compute.create_server(
+          name=SERVER_NAME, image_id=image.id, flavor_id=flavor.id,
+          networks=[{"uuid": network.id}])
+    except Exception as e:
+      status = 'FAILED'
+      reasonForFailure = str(e)
+    if status != 'FAILED':
+      server = conn.compute.wait_for_server(server)
 
     taskTime = time.time() - start_time
 
     results['task_name'] = 'create server'
     results['time'] = taskTime
-    results['date'] = datetime.datetime.now()
+    results['date'] = str(datetime.datetime.now())
+    results['task'] = 'create_server'
+    results['status'] = status
+    results['reason_for_failure'] = reasonForFailure
+    print(results)
     file = open('/var/www/html/stats/server-creation', 'w')
     file.write(json.dumps(results))
     delete_server(conn, server)
+
+    api_key = '454a635d-2b64-4a10-8a42-c760dc863dac'
+    page_id = 'j8qtjpb4z4gy'
+    metric_id = 'nj89bk1r49nc'
+    api_base = 'api.statuspage.io'
+
+    ts = int(time.time())
+    params = urllib.urlencode({'data[timestamp]': ts, 'data[value]': results['time']})
+    headers = {"Content-Type": "application/x-www-form-urlencoded", "Authorization": "OAuth " + api_key}
+
+    conn = httplib.HTTPSConnection(api_base)
+    conn.request("POST", "/v1/pages/" + page_id + "/metrics/" + metric_id + "/data.json", params, headers)
+    response = conn.getresponse()
+    print(response.status)
 
 def delete_server(conn, server):
     print("Delete Server:")
