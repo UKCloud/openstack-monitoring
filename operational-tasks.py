@@ -34,7 +34,7 @@ TEST_CLOUD = os.getenv('OS_TEST_CLOUD', CLOUD_NAME)
 SERVER_NAME = 'openstacksdk-example'
 IMAGE_NAME = 'CentOS 7'
 FLAVOR_NAME = 'm1.small'
-NETWORK_NAME = 'NetworkTest'
+NETWORK_NAME = 'private-NAT'
 
 class Opts(object):
     def __init__(self, cloud_name=CLOUD_NAME, debug=False):
